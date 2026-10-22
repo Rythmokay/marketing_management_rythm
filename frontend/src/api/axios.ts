@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '../store/authStore';
+import { DEMO_READ_ONLY_EVENT, useAuthStore } from '../store/authStore';
 
 export const api = axios.create({
     // Same server as the web app in production; in development Vite forwards /api to localhost:8080
@@ -23,6 +23,9 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !isLogin && useAuthStore.getState().token) {
             useAuthStore.getState().logout();
             window.location.replace('/?session=ended');
+        }
+        if (error.response?.status === 403 && useAuthStore.getState().user?.role === 'DEMO') {
+            window.dispatchEvent(new Event(DEMO_READ_ONLY_EVENT));
         }
         return Promise.reject(error);
     }

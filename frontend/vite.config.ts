@@ -6,9 +6,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    // Local development: send API calls to the Spring Boot backend
+    // Local development: send API calls to the Spring Boot backend (API_PROXY_TARGET if it runs on another port)
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': process.env.API_PROXY_TARGET || 'http://localhost:8080',
     },
   },
 })

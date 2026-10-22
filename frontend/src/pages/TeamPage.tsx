@@ -15,6 +15,8 @@ const initials = (m: TeamMember) => initialsOf(memberName(m));
 const RoleBadge: React.FC<{ role: TeamRole }> = ({ role }) =>
   role === 'ADMIN'
     ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-violet-50 text-violet-800 border-violet-200"><ShieldCheck className="w-3 h-3" aria-hidden />Admin</span>
+    : role === 'DEMO'
+    ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-amber-50 text-amber-800 border-amber-200">Demo (read-only)</span>
     : <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-700 border-slate-200">Team member</span>;
 
 const RoleChoice: React.FC<{ value: TeamRole; onChange: (r: TeamRole) => void }> = ({ value, onChange }) => (

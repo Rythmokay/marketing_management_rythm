@@ -1,6 +1,6 @@
 import { api } from './axios';
 
-export type TeamRole = 'ADMIN' | 'EMPLOYEE';
+export type TeamRole = 'ADMIN' | 'EMPLOYEE' | 'DEMO';
 
 export interface TeamMember {
   id: number;

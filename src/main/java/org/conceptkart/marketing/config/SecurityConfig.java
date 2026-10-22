@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -41,7 +42,9 @@ public class SecurityConfig {
                 // Spring's error page must be reachable, or a 403/404 is reported as 401 "not signed in"
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/**").authenticated()
+                // The demo account is read-only: it may load data but not change it or run Gemini searches
+                .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
+                .requestMatchers("/api/**").hasAnyRole("ADMIN", "EMPLOYEE")
                 // Everything else is the web app itself (HTML, JS, CSS), which must load before sign-in
                 .anyRequest().permitAll()
             )
@@ -56,7 +59,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // React frontend URL
+        // Vite dev server on any local port (the built app is served from the same origin as the API)
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:[*]", "http://127.0.0.1:[*]"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

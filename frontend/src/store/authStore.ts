@@ -42,3 +42,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 /** Only admins manage the marketing team; everyone can view and change portal content. */
 export const useIsAdmin = () => useAuthStore(s => s.user?.role === 'ADMIN');
+
+/** The public demo login: can view everything, but the server rejects every change. */
+export const useIsDemo = () => useAuthStore(s => s.user?.role === 'DEMO');
+
+/** Fired when the demo account tries to change something, so the layout can explain why it failed. */
+export const DEMO_READ_ONLY_EVENT = 'demo-read-only';

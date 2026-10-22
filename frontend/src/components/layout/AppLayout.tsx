@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { History, LayoutDashboard, LogOut, Package, PanelLeftClose, PanelLeftOpen, ScanSearch, UserCog, Users } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
+import { DEMO_READ_ONLY_EVENT, useAuthStore } from '../../store/authStore';
 import { useCrmStore } from '../../store/crmStore';
 import { useReviewSearchStore } from '../../store/reviewSearchStore';
 
@@ -42,6 +42,20 @@ export const AppLayout: React.FC = () => {
   const [width, setWidth] = useState(() => readPrefs().width);
   const [collapsed, setCollapsed] = useState(() => readPrefs().collapsed);
   const [dragging, setDragging] = useState(false);
+  const isDemo = user?.role === 'DEMO';
+  // Shown for a few seconds when the read-only demo account tries to change something
+  const [demoBlocked, setDemoBlocked] = useState(false);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    const onBlocked = () => {
+      setDemoBlocked(true);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setDemoBlocked(false), 5000);
+    };
+    window.addEventListener(DEMO_READ_ONLY_EVENT, onBlocked);
+    return () => { window.removeEventListener(DEMO_READ_ONLY_EVENT, onBlocked); window.clearTimeout(timer); };
+  }, []);
   const asideRef = useRef<HTMLElement>(null);
   // Width before a drag, so dragging it closed and reopening returns to the same width
   const dragStartWidth = useRef(width);
@@ -231,6 +245,11 @@ export const AppLayout: React.FC = () => {
 
       <main className="flex-1 overflow-y-auto min-w-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          {isDemo && (
+            <p role="note" className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 mb-5">
+              <span className="font-semibold">Read-only demo.</span> Explore every page freely — adding, editing, deleting and Gemini searches are turned off for this account.
+            </p>
+          )}
           {loadError ? (
             <div className="card p-8 text-center flex flex-col items-center gap-3">
               <p className="text-sm text-slate-700">{loadError}</p>
@@ -243,6 +262,12 @@ export const AppLayout: React.FC = () => {
           )}
         </div>
       </main>
+
+      {demoBlocked && (
+        <div role="alert" className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100%-2rem)] text-sm text-white bg-slate-900 rounded-lg shadow-lg px-4 py-3">
+          This is a read-only demo account, so changes aren't saved.
+        </div>
+      )}
     </div>
   );
 };

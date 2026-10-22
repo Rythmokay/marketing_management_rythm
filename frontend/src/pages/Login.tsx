@@ -13,6 +13,8 @@ export const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    // Public read-only demo login, when the server has one turned on
+    const [demo, setDemo] = useState<{ username: string; password: string } | null>(null);
     
     const navigate = useNavigate();
     // Set when the session ended on the server (password changed or member removed)
@@ -24,6 +26,10 @@ export const Login = () => {
             navigate('/overview', { replace: true });
         }
     }, [token, user, navigate]);
+
+    useEffect(() => {
+        api.get('/auth/demo').then(res => setDemo(res.data)).catch(() => setDemo(null));
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,10 +46,12 @@ export const Login = () => {
             navigate('/overview');
         } catch (error: any) {
             console.error("Login failed", error);
-            if (error.response && error.response.status === 403) {
-                setErrorMsg("Invalid credentials. Please verify your account.");
-            } else {
+            const status = error.response?.status;
+            if (status === 401 || status === 403) {
                 setErrorMsg("Invalid credentials. Please try again.");
+            } else {
+                // No answer or a server error: the password may be fine, so don't blame it
+                setErrorMsg("Can't reach the server right now. Please try again in a moment.");
             }
         } finally {
             setIsLoading(false);
@@ -109,6 +117,27 @@ export const Login = () => {
                             </Button>
                         </div>
                     </form>
+
+                    {demo && (
+                        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50/60 p-4 text-sm">
+                            <p className="font-semibold text-slate-900 mb-1">Just looking around? Use the demo account</p>
+                            <p className="text-slate-600 mb-3">Read-only access to every page, with sample data.</p>
+                            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 mb-3">
+                                <dt className="text-slate-500">Username</dt>
+                                <dd><code className="font-mono font-semibold text-slate-900 select-all">{demo.username}</code></dd>
+                                <dt className="text-slate-500">Password</dt>
+                                <dd><code className="font-mono font-semibold text-slate-900 select-all">{demo.password}</code></dd>
+                            </dl>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                fullWidth
+                                onClick={() => { setUsername(demo.username); setPassword(demo.password); setErrorMsg(''); }}
+                            >
+                                Fill in demo account
+                            </Button>
+                        </div>
+                    )}
                 </Card>
             </div>
         </div>

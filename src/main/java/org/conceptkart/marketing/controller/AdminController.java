@@ -132,7 +132,11 @@ public class AdminController {
     }
 
     private static String roleLabel(Role role) {
-        return role == Role.ADMIN ? "Admin" : "Team member";
+        return switch (role) {
+            case ADMIN -> "Admin";
+            case EMPLOYEE -> "Team member";
+            case DEMO -> "Demo (read-only)";
+        };
     }
 
     private static String blankToNull(String value) {
