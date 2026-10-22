@@ -11,14 +11,14 @@ Environment settings.
 
 ## 1. Create the PostgreSQL database
 
-1. In Dokploy: **Create Project** → `rythm-marketing-management`.
+1. In Dokploy: open (or **Create Project**) `marketing_management`.
 2. Inside it: **Create Service → Database → PostgreSQL**, e.g. name `rythm-marketing-db`,
    database name `rythm_marketing`, a user and a new password.
 3. Deploy the database and note its **Internal Credentials**:
 
 | Dokploy field | Goes into variable |
 |---|---|
-| Internal Host (e.g. `rythm-marketing-management-rythm-marketing-db-xxxxxx`) | `DB_HOST` |
+| Internal Host (e.g. `marketing-management-rythm-marketing-db-xxxxxx`) | `DB_HOST` |
 | Internal Port (usually `5432`) | `DB_PORT` |
 | Database Name | `DB_NAME` |
 | User | `DB_USERNAME` |
