@@ -1,0 +1,18 @@
+# Keep the build context small and free of local data
+.git
+.gradle
+.idea
+.vscode
+build
+bin
+out
+data
+*.mv.db
+*.trace.db
+.env
+.env.*
+!.env.example
+frontend/node_modules
+frontend/dist
+frontend/data
+**/.DS_Store

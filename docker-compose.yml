@@ -1,0 +1,44 @@
+# Run the production setup locally (app + PostgreSQL):
+#   cp .env.example .env   # then fill in the values
+#   docker compose up --build
+# Open http://localhost:8081  (8081 so it can run next to the original portal on 8080)
+# On Dokploy, deploy the Dockerfile as an Application and use Dokploy's own PostgreSQL (see DEPLOY.md).
+
+name: rythm-marketing-management
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-rythm_marketing}
+      POSTGRES_USER: ${DB_USERNAME:-rythm_marketing}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - rythm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-rythm_marketing}
+      DB_USERNAME: ${DB_USERNAME:-rythm_marketing}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:?Set APP_ADMIN_PASSWORD in .env}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
+    ports:
+      - "${APP_PORT:-8081}:8080"
+
+volumes:
+  rythm-db-data:
